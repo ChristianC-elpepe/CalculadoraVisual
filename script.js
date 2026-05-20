@@ -1,91 +1,121 @@
-body {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    background-color: #1e1e24;
-    font-family: Arial, Helvetica, sans-serif;
-    margin: 0;
+let firstOperand = '';
+let secondOperand = '';
+let currentOperator = null;
+let shouldResetDisplay = false;
+
+const display = document.getElementById('calc-display');
+
+function updateDisplay(value) {
+    display.value = value;
 }
 
-.calc-container {
-    width: 360px;
-    background-color: #2b2d42;
-    padding: 25px;
-    border-radius: 24px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+function appendNumber(num) {
+    if (shouldResetDisplay) {
+        updateDisplay('');
+        shouldResetDisplay = false;
+    }
+
+    // Evitar múltiples ceros al inicio
+    if (display.value === '0' && num === '0') return;
+    // Evitar múltiples puntos decimales
+    if (num === '.' && display.value.includes('.')) return;
+
+    updateDisplay(display.value + num);
 }
 
-#calc-display {
-    width: 100%;
-    height: 70px;
-    font-size: 36px;
-    text-align: right;
-    margin-bottom: 20px;
-    padding: 15px;
-    box-sizing: border-box;
-    border: none;
-    border-radius: 12px;
-    background-color: #edf2f4;
-    color: #2b2d42;
-    font-weight: bold;
+function setOperator(op) {
+    if (display.value === '') return;
+
+    if (currentOperator && !shouldResetDisplay) {
+        calculate();
+    }
+
+    firstOperand = display.value;
+    currentOperator = op;
+    shouldResetDisplay = true;
+
+    updateDisplay(firstOperand + ' ' + op);
 }
 
-.calc-buttonss {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 12px;
+// Nueva función para operaciones científicas instantáneas
+function scientificOp(op) {
+    if (display.value === '' && op !== 'pi') return;
+    
+    let val = parseFloat(display.value);
+    let result;
+
+    switch (op) {
+        case 'sin':  result = Math.sin(val); break;
+        case 'cos':  result = Math.cos(val); break;
+        case 'tan':  result = Math.tan(val); break;
+        case 'sqrt': result = Math.sqrt(val); break;
+        case 'log':  result = Math.log10(val); break;
+        case 'ln':   result = Math.log(val); break;
+        case 'pi':   result = Math.PI; break;
+    }
+
+    if (isNaN(result) || result === Infinity || result === -Infinity) {
+        updateDisplay('Error');
+        clearDisplay();
+        return;
+    }
+
+    result = parseFloat(result.toFixed(10));
+    updateDisplay(result);
+    firstOperand = result;
+    shouldResetDisplay = true;
 }
 
-/* Estilo general de los botones */
-button {
-    height: 55px;
-    font-size: 18px;
-    font-weight: bold;
-    border: none;
-    border-radius: 12px;
-    background-color: #8d99ae;
-    color: #ffffff;
-    cursor: pointer;
-    transition: background-color 0.2s, transform 0.1s;
+function calculate() {
+    if (!currentOperator || shouldResetDisplay) return;
+
+    secondOperand = display.value;
+    const a = parseFloat(firstOperand);
+    const b = parseFloat(secondOperand);
+    let result;
+
+    switch (currentOperator) {
+        case '+': result = a + b; break;
+        case '-': result = a - b; break;
+        case '*': result = a * b; break;
+        case '/':
+            if (b === 0) {
+                updateDisplay('Error');
+                currentOperator = null;
+                firstOperand = '';
+                return;
+            }
+            result = a / b;
+            break;
+        case '^': // Operación de potencia añadida
+            result = Math.pow(a, b);
+            break;
+    }
+
+    result = parseFloat(result.toFixed(10));
+
+    updateDisplay(result);
+    firstOperand = result;
+    currentOperator = null;
+    shouldResetDisplay = true;
 }
 
-button:active {
-    transform: scale(0.95);
+function clearDisplay() {
+    updateDisplay('');
+    firstOperand = '';
+    secondOperand = '';
+    currentOperator = null;
+    shouldResetDisplay = false;
 }
 
-/* Botón de igual (ocupa las 4 columnas abajo) */
-.btn-equal {
-    grid-column: span 4;
-    background-color: #ef233c;
-    color: white;
-    font-size: 24px;
-}
-
-.btn-equal:hover {
-    background-color: #d90429;
-}
-
-/* Botones de operadores (+, -, *, /) */
-.btn-op {
-    background-color: #f77f00;
-}
-
-.btn-op:hover {
-    background-color: #fcbf49;
-}
-
-/* Botones científicos */
-.btn-sci {
-    background-color: #4a4e69;
-    font-size: 16px;
-}
-
-.btn-sci:hover {
-    background-color: #9a8c98;
-}
-
-/* Botón de borrado */
-.btn-clear {
-    background-color: #d90429;
-}
+// Soporte para teclado
+document.addEventListener('keydown', (e) => {
+    if ((e.key >= '0' && e.key <= '9') || e.key === '.') appendNumber(e.key);
+    else if (e.key === '+') setOperator('+');
+    else if (e.key === '-') setOperator('-');
+    else if (e.key === '*') setOperator('*');
+    else if (e.key === '^') setOperator('|');
+    else if (e.key === '/') { e.preventDefault(); setOperator('/'); }
+    else if (e.key === 'Enter' || e.key === '=') calculate();
+    else if (e.key === 'Escape') clearDisplay();
+});

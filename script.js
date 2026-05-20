@@ -34,35 +34,52 @@ function setOperator(op) {
     currentOperator = op;
     shouldResetDisplay = true;
 
+    // Indicador visual temporal en pantalla
     updateDisplay(firstOperand + ' ' + op);
 }
 
-// Nueva función para operaciones científicas instantáneas
+// Operaciones científicas instantáneas
 function scientificOp(op) {
     if (display.value === '' && op !== 'pi') return;
     
     let val = parseFloat(display.value);
     let result;
 
+    // Función auxiliar para calcular directamente en grados
+    const toRadians = (degrees) => degrees * (Math.PI / 180);
+
     switch (op) {
-        case 'sin':  result = Math.sin(val); break;
-        case 'cos':  result = Math.cos(val); break;
-        case 'tan':  result = Math.tan(val); break;
-        case 'sqrt': result = Math.sqrt(val); break;
-        case 'log':  result = Math.log10(val); break;
-        case 'ln':   result = Math.log(val); break;
+        case 'sin':  result = Math.sin(toRadians(val)); break;
+        case 'cos':  result = Math.cos(toRadians(val)); break;
+        case 'tan':  result = Math.tan(toRadians(val)); break;
+        case 'sqrt': 
+            if (val < 0) {
+                showError();
+                return;
+            }
+            result = Math.sqrt(val); 
+            break;
+        case 'log':  
+            if (val <= 0) { showError(); return; }
+            result = Math.log10(val); 
+            break;
+        case 'ln':   
+            if (val <= 0) { showError(); return; }
+            result = Math.log(val); 
+            break;
         case 'pi':   result = Math.PI; break;
     }
 
     if (isNaN(result) || result === Infinity || result === -Infinity) {
-        updateDisplay('Error');
-        clearDisplay();
+        showError();
         return;
     }
 
+    // Limpieza de imprecisiones de coma flotante (ej. cos(90) dando 6.12e-17)
     result = parseFloat(result.toFixed(10));
+    
     updateDisplay(result);
-    firstOperand = result;
+    firstOperand = result.toString();
     shouldResetDisplay = true;
 }
 
@@ -80,14 +97,12 @@ function calculate() {
         case '*': result = a * b; break;
         case '/':
             if (b === 0) {
-                updateDisplay('Error');
-                currentOperator = null;
-                firstOperand = '';
+                showError();
                 return;
             }
             result = a / b;
             break;
-        case '^': // Operación de potencia añadida
+        case '^': 
             result = Math.pow(a, b);
             break;
     }
@@ -95,7 +110,7 @@ function calculate() {
     result = parseFloat(result.toFixed(10));
 
     updateDisplay(result);
-    firstOperand = result;
+    firstOperand = result.toString();
     currentOperator = null;
     shouldResetDisplay = true;
 }
@@ -108,14 +123,34 @@ function clearDisplay() {
     shouldResetDisplay = false;
 }
 
-// Soporte para teclado
+function showError() {
+    updateDisplay('Error');
+    setTimeout(clearDisplay, 1500);
+}
+
+// Soporte completo para teclado
 document.addEventListener('keydown', (e) => {
-    if ((e.key >= '0' && e.key <= '9') || e.key === '.') appendNumber(e.key);
-    else if (e.key === '+') setOperator('+');
-    else if (e.key === '-') setOperator('-');
-    else if (e.key === '*') setOperator('*');
-    else if (e.key === '^') setOperator('|');
-    else if (e.key === '/') { e.preventDefault(); setOperator('/'); }
-    else if (e.key === 'Enter' || e.key === '=') calculate();
-    else if (e.key === 'Escape') clearDisplay();
+    if ((e.key >= '0' && e.key <= '9') || e.key === '.') {
+        appendNumber(e.key);
+    } else if (e.key === '+') {
+        setOperator('+');
+    } else if (e.key === '-') {
+        setOperator('-');
+    } else if (e.key === '*') {
+        setOperator('*');
+    } else if (e.key === '^') { 
+        setOperator('^'); // Corregido el mapeo de la tecla
+    } else if (e.key === '/') { 
+        e.preventDefault(); 
+        setOperator('/'); 
+    } else if (e.key === 'Enter' || e.key === '=') { 
+        e.preventDefault(); 
+        calculate(); 
+    } else if (e.key === 'Escape') {
+        clearDisplay();
+    } else if (e.key === 'Backspace') {
+        if (!shouldResetDisplay && display.value.length > 0) {
+            updateDisplay(display.value.slice(0, -1));
+        }
+    }
 });

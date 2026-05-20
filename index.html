@@ -3,37 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Calculadora Científica</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="calc-container">
-        <input type="text" id="calc-display" disabled>
+        <input type="text" id="calc-display" disabled placeholder="0">
         <div class="calc-buttonss">
-            <button onclick="appendNumber('1')">1</button>
-            <button onclick="appendNumber('2')">2</button>
-            <button onclick="appendNumber('3')">3</button>
-            <button onclick="appendNumber('4')">4</button>
-            <button onclick="appendNumber('5')">5</button>
-            <button onclick="appendNumber('6')">6</button>
+            <button onclick="scientificOp('sin')" class="btn-sci">sin</button>
+            <button onclick="scientificOp('cos')" class="btn-sci">cos</button>
+            <button onclick="scientificOp('tan')" class="btn-sci">tan</button>
+            <button onclick="scientificOp('sqrt')" class="btn-sci">√</button>
+
+            <button onclick="scientificOp('log')" class="btn-sci">log</button>
+            <button onclick="scientificOp('ln')" class="btn-sci">ln</button>
+            <button onclick="setOperator('^')" class="btn-sci">xʸ</button>
+            <button onclick="scientificOp('pi')" class="btn-sci">π</button>
+
             <button onclick="appendNumber('7')">7</button>
             <button onclick="appendNumber('8')">8</button>
             <button onclick="appendNumber('9')">9</button>
+            <button onclick="setOperator('/')" class="btn-op">/</button>
+
+            <button onclick="appendNumber('4')">4</button>
+            <button onclick="appendNumber('5')">5</button>
+            <button onclick="appendNumber('6')">6</button>
+            <button onclick="setOperator('*')" class="btn-op">*</button>
+
+            <button onclick="appendNumber('1')">1</button>
+            <button onclick="appendNumber('2')">2</button>
+            <button onclick="appendNumber('3')">3</button>
+            <button onclick="setOperator('-')" class="btn-op">-</button>
+
+            <button onclick="clearDisplay()" class="btn-clear">C</button>
             <button onclick="appendNumber('0')">0</button>
-            <button onclick="setOperator('+')">+</button>
-            <button onclick="setOperator('-')">-</button>
-            <button onclick="setOperator('*')">*</button>
-            <button onclick="setOperator('/')">/</button>
-            <button onclick="calculate()" id="calc-evaluation">=</button>
-            <button onclick="clearDisplay()">C</button>
-
+            <button onclick="appendNumber('.')">.</button>
+            <button onclick="setOperator('+')" class="btn-op">+</button>
+            
+            <button onclick="calculate()" id="calc-evaluation" class="btn-equal">=</button>
         </div>
-
     </div>
-    
-
-
-
     <script src="script.js"></script>
 </body>
 </html>
